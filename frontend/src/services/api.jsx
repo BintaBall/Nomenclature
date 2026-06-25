@@ -4,7 +4,7 @@ import axios from "axios"
 
 // ── Instance Axios configurée ─────────────────────────────────────────────
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "https://nomenclature.glybette.com",
+  baseURL: import.meta.env.VITE_API_URL || "https://nomenclature.glybette.com/api",
   timeout: 60000,   // 60s — la recherche externe + proxy peut être lente
   headers: { "Content-Type": "application/json" },
 })
