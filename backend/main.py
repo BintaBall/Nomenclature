@@ -317,12 +317,13 @@ async def library(
 # ── Historique utilisateur (Dataset 2 — MongoDB) ──────────────────────────
 
 @app.post("/history/save")
-async def save_history(req: HistoryRequest, user=Depends(lambda: None)):
-    from auth import get_current_user
+async def save_history(req: HistoryRequest, user=Depends(get_current_user)):
+    """Sauvegarder une analyse dans l'historique de l'utilisateur connecté."""
     try:
         from database import insert_submission
-        data          = req.model_dump()
-        data["user_id"] = "anonymous"
+        data = req.model_dump()
+        # ✅ Utiliser l'ID de l'utilisateur connecté
+        data["user_id"] = user["id"] if user else "anonymous"
         doc_id = await insert_submission(data)
         return {"id": doc_id, "message": "Sauvegardé"}
     except Exception as e:
@@ -331,10 +332,14 @@ async def save_history(req: HistoryRequest, user=Depends(lambda: None)):
 
 
 @app.get("/history/mine")
-async def get_my_history():
+async def get_my_history(user=Depends(get_current_user)):
+    """Historique personnel de l'utilisateur connecté."""
     try:
         from database import get_user_submissions
-        subs = await get_user_submissions(user_id="anonymous", limit=100)
+        # ✅ Utiliser l'ID de l'utilisateur connecté
+        if not user:
+            return {"submissions": []}
+        subs = await get_user_submissions(user_id=user["id"], limit=100)
         return {"submissions": subs}
     except Exception as e:
         log.warning(f"MongoDB history error: {e}")
@@ -342,10 +347,13 @@ async def get_my_history():
 
 
 @app.delete("/history/{submission_id}")
-async def delete_submission_ep(submission_id: str):
+async def delete_submission_ep(submission_id: str, user=Depends(get_current_user)):
+    """Supprimer une soumission (seulement si elle appartient à l'utilisateur)."""
     try:
         from database import delete_submission
-        deleted = await delete_submission(submission_id, "anonymous")
+        if not user:
+            raise HTTPException(401, "Non connecté")
+        deleted = await delete_submission(submission_id, user["id"])
         if not deleted:
             raise HTTPException(404, "Soumission introuvable")
         return {"message": "Soumission supprimée"}
@@ -356,10 +364,13 @@ async def delete_submission_ep(submission_id: str):
 
 
 @app.get("/history/{submission_id}")
-async def get_submission_detail(submission_id: str):
+async def get_submission_detail(submission_id: str, user=Depends(get_current_user)):
+    """Détail d'une soumission (seulement si elle appartient à l'utilisateur)."""
     try:
         from database import get_submission_by_id
-        doc = await get_submission_by_id(submission_id, "anonymous")
+        if not user:
+            raise HTTPException(401, "Non connecté")
+        doc = await get_submission_by_id(submission_id, user["id"])
         if not doc:
             raise HTTPException(404, "Soumission introuvable")
         return doc
@@ -477,7 +488,7 @@ async def github_cb(code: str = None, error: str = None):
     Callback GitHub — échange le code, crée/met à jour l'utilisateur,
     redirige vers /login/callback?token=...
     """
-    frontend = os.getenv("FRONTEND_URL", "http://51.210.178.46:8000/auth/github/callback")
+    frontend = os.getenv("FRONTEND_URL", "https://nomenclature.glybette.com")
     if error or not code:
         return RedirectResponse(f"{frontend}/login?error=github_denied")
     try:
