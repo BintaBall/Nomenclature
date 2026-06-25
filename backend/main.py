@@ -42,7 +42,7 @@ logging.basicConfig(level=logging.INFO,
 CSV_PATH      = os.getenv("CSV_PATH",      "../data/ai_projects_cleaned.csv")
 BUNDLE_PATH   = os.getenv("BUNDLE_PATH",   "../data/xgboost_bundle.pkl")
 TRIGGER_SCORE = float(os.getenv("TRIGGER_SCORE", "0.45"))
-FRONTEND_URL  = os.getenv("FRONTEND_URL",  "http://localhost:5173")
+FRONTEND_URL  = os.getenv("FRONTEND_URL",  "https://nomenclature.glybette.com")
 
 _sim_engine  = None
 _ext_engine  = None
@@ -84,7 +84,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[FRONTEND_URL, "http://localhost:5173", "http://localhost:3000"],
+    allow_origins=[FRONTEND_URL, "https://nomenclature.glybette.com"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -477,7 +477,7 @@ async def github_cb(code: str = None, error: str = None):
     Callback GitHub — échange le code, crée/met à jour l'utilisateur,
     redirige vers /login/callback?token=...
     """
-    frontend = os.getenv("FRONTEND_URL", "http://localhost:5173")
+    frontend = os.getenv("FRONTEND_URL", "http://51.210.178.46:8000/auth/github/callback")
     if error or not code:
         return RedirectResponse(f"{frontend}/login?error=github_denied")
     try:

@@ -4,7 +4,7 @@ import axios from "axios"
 
 // ── Instance Axios configurée ─────────────────────────────────────────────
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000",
+  baseURL: import.meta.env.VITE_API_URL || "http://51.210.178.46:8000",
   timeout: 60000,   // 60s — la recherche externe + proxy peut être lente
   headers: { "Content-Type": "application/json" },
 })

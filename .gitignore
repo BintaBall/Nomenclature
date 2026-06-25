@@ -9,7 +9,6 @@ deploy.txt
 deploy.txt.pub
 eda_plots
 ai_projects.db
-external_search.py
 similarity.py
 s_engine.py
 .env

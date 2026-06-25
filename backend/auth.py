@@ -28,11 +28,11 @@ from database import get_db
 SECRET_KEY    = os.getenv("JWT_SECRET", "aiscope-dev-secret-change-in-prod-2024")
 ALGORITHM     = "HS256"
 TOKEN_EXPIRY  = int(os.getenv("JWT_EXPIRY_HOURS", "72"))
-FRONTEND_URL  = os.getenv("FRONTEND_URL", "http://localhost:5173")
+FRONTEND_URL  = os.getenv("FRONTEND_URL", "https://nomenclature.glybette.com")
 
 GH_CLIENT_ID     = os.getenv("GITHUB_CLIENT_ID", "")
 GH_CLIENT_SECRET = os.getenv("GITHUB_CLIENT_SECRET", "")
-GH_REDIRECT_URI  = os.getenv("GITHUB_REDIRECT_URI", "http://localhost:8000/auth/github/callback")
+GH_REDIRECT_URI  = os.getenv("GITHUB_REDIRECT_URI", "http://51.210.178.46:8000/auth/github/callback")
 
 security = HTTPBearer(auto_error=False)
 
