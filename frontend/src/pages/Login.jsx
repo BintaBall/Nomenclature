@@ -3,7 +3,7 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import axios from "axios"
 
-const BASE = import.meta.env.VITE_API_URL || "http://localhost:8000"
+const BASE = import.meta.env.VITE_API_URL || "https://nomenclature.glybette.com/api"
 
 export default function Login({ onLogin }) {
   const [tab,      setTab]      = useState("login")
