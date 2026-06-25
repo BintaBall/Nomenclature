@@ -57,6 +57,7 @@ async def insert_submission(data: dict) -> str:
         "domain_confidence":  data.get("domain_confidence", 0.0),
         "originality_score":  data.get("originality_score", 0.0),
         "originality_label":  data.get("originality_label", ""),
+        "user_id":            data.get("user_id", "anonymous"),  # ✅ Ajout de user_id
         # Top 5 projets similaires résumés (pas toute la réponse)
         "similar_projects": [
             {
@@ -75,12 +76,13 @@ async def insert_submission(data: dict) -> str:
     return str(result.inserted_id)
 
 
-async def get_user_submissions(limit: int = 50) -> list[dict]:
-    """Récupère l'historique des soumissions (les plus récentes d'abord)."""
+async def get_user_submissions(user_id: str, limit: int = 50) -> list[dict]:
+    """Récupère l'historique des soumissions d'un utilisateur spécifique."""
     cursor = get_submissions().find(
-        {}, {"_id": 1, "description": 1, "predicted_domain": 1,
-             "originality_score": 1, "originality_label": 1,
-             "is_public": 1, "submitted_at": 1}
+        {"user_id": user_id},  # ✅ Filtrer par user_id
+        {"_id": 1, "description": 1, "predicted_domain": 1,
+         "originality_score": 1, "originality_label": 1,
+         "is_public": 1, "submitted_at": 1, "user_id": 1}
     ).sort("submitted_at", -1).limit(limit)
 
     results = []
@@ -88,6 +90,36 @@ async def get_user_submissions(limit: int = 50) -> list[dict]:
         doc["id"] = str(doc.pop("_id"))
         results.append(doc)
     return results
+
+
+async def get_submission_by_id(submission_id: str, user_id: Optional[str] = None) -> Optional[dict]:
+    """Récupère une soumission par son ID (vérifie l'appartenance si user_id fourni)."""
+    from bson import ObjectId
+    try:
+        obj_id = ObjectId(submission_id)
+    except:
+        return None
+    
+    query = {"_id": obj_id}
+    if user_id:
+        query["user_id"] = user_id
+    
+    doc = await get_submissions().find_one(query)
+    if doc:
+        doc["id"] = str(doc.pop("_id"))
+    return doc
+
+
+async def delete_submission(submission_id: str, user_id: str) -> bool:
+    """Supprime une soumission (seulement si elle appartient à l'utilisateur)."""
+    from bson import ObjectId
+    try:
+        obj_id = ObjectId(submission_id)
+    except:
+        return False
+    
+    result = await get_submissions().delete_one({"_id": obj_id, "user_id": user_id})
+    return result.deleted_count > 0
 
 
 async def contribute_submission(submission_data: dict) -> str:
@@ -140,6 +172,7 @@ async def create_indexes():
     await get_submissions().create_index("submitted_at")
     await get_submissions().create_index("predicted_domain")
     await get_submissions().create_index("originality_score")
+    await get_submissions().create_index("user_id")  # ✅ Index pour les requêtes par utilisateur
     await get_contributions().create_index("validated_at")
     await get_contributions().create_index("predicted_domain")
 
