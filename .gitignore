@@ -1,0 +1,16 @@
+data/ai_projects_cleaned.csv  # 20MB, trop lourd pour GitHub
+data/xgboost_bundle.pkl     # idem
+.faiss_cache_*.npy          # cache généré localement
+__pycache__/
+node_modules/
+.similarity_cache/
+deploy.sh
+deploy.txt
+deploy.txt.pub
+eda_plots
+ai_projects.db
+external_search.py
+similarity.py
+s_engine.py
+.env
+backend/.env

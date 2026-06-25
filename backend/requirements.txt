@@ -1,0 +1,28 @@
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+python-dotenv>=1.0.0
+pydantic>=2.0.0
+
+# MongoDB — Dataset 2
+motor>=3.4.0          # driver async MongoDB (motor = pymongo async)
+pymongo>=4.7.0
+
+# Similarité
+scikit-learn>=1.4.0
+pandas>=2.0.0
+numpy>=1.26.0
+faiss-cpu>=1.8.0
+xgboost>=2.0.0
+
+# Recherche externe
+requests>=2.31.0
+feedparser>=6.0.11
+beautifulsoup4>=4.12.0
+
+# Auth JWT
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+
+# OAuth GitHub
+httpx>=0.27.0
+authlib>=1.3.0

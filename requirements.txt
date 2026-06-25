@@ -1,0 +1,24 @@
+# ── Core ────────────────────────────────────────────
+feedparser>=6.0.11
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+lxml>=5.0.0
+python-dotenv>=1.0.0
+
+# ── Base de données ──────────────────────────────────
+SQLAlchemy>=2.0.0
+# psycopg2-binary>=2.9.9   # décommenter pour PostgreSQL
+
+# ── Dataset export ───────────────────────────────────
+pandas>=2.0.0
+pyarrow>=14.0.0            # moteur Parquet
+
+# ── Upload HuggingFace Hub (optionnel) ───────────────
+datasets>=2.18.0          # décommenter pour `export --format hf`
+huggingface_hub>=0.22.0
+
+# ── Étape 2 — Similarité sémantique (optionnel) ──────
+sentence-transformers>=2.7.0
+faiss-cpu>=1.8.0
+scikit-learn>=1.4.0
+numpy>=1.26.0

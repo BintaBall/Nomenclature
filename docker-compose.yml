@@ -1,0 +1,43 @@
+# AIScope — 2 containers : backend + frontend
+# MongoDB est géré en externe via MongoDB Atlas (cloud)
+# Usage : docker compose up --build -d
+
+services:
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: aiscope-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data/ai_projects_cleaned.csv:/app/ai_projects_cleaned.csv:ro
+      - ./data/xgboost_bundle.pkl:/app/xgboost_bundle.pkl:ro
+      - ./.similarity_cache:/app/.similarity_cache
+    environment:
+      - CSV_PATH=ai_projects_cleaned.csv
+      - BUNDLE_PATH=xgboost_bundle.pkl
+    env_file:
+      - ./backend/.env
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: aiscope-frontend
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    depends_on:
+      backend:
+        condition: service_healthy
