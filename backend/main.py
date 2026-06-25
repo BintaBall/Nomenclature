@@ -33,6 +33,12 @@ from fastapi import FastAPI, HTTPException, Query, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, Field
+from auth import (
+    RegisterRequest, LoginRequest,
+    register_user, login_user,
+    get_current_user,
+    github_login_url, github_callback,
+)
 
 load_dotenv()
 log = logging.getLogger("aiscope")
