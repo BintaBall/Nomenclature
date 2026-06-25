@@ -1,0 +1,54 @@
+name: 🚀 Déployer 
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: 📥 Checkout du code
+        uses: actions/checkout@v4
+
+      - name: 🔑 Configurer la clé SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.VPS_IP }} >> ~/.ssh/known_hosts
+
+      - name: 📦 Envoyer les fichiers vers le VPS
+        run: |
+          rsync -avz --delete \
+            --exclude='node_modules' \
+            --exclude='.git' \
+            --exclude='.env' \
+            --exclude='deploy.txt' \
+            --exclude='deploy.txt.pub' \
+            --exclude='.similarity_cache' \
+            --exclude='__pycache__' \
+            --exclude='*.pyc' \
+            ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_IP }}:~/nomenclature/
+
+      - name: 🔧 Reconstruire et redémarrer les containers
+        run: |
+          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_IP }} "
+            cd ~/nomenclature &&
+            docker compose down &&
+            docker compose up --build -d &&
+            sleep 5 &&
+            curl -f http://localhost:8000/health || exit 1
+          "
+
+      - name: 🧹 Nettoyer les images Docker
+        run: |
+          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_IP }} "
+            docker system prune -f
+          "
+
+      - name: ✅ Succès
+        run: echo "✅ Déploiement terminé avec succès !"
